@@ -13,19 +13,24 @@ class Database:
     def save_video_data(self,data):
         db = pymysql.connect(host=Database.ip,port=Database.port,user=Database.user,passwd=Database.pawd,db=Database.db_name,charset='utf8')
         cursor = db.cursor(cursor=pymysql.cursors.DictCursor)
-        sql = "SELECT * FROM base_video_data WHERE bvid = '%s' order by id desc limit 1" % (data['bvid'])
+        sql = "SELECT * FROM base_video_data WHERE vid = '%s' order by id desc limit 1" % (data['vid'])
         cursor.execute(sql)
         res = cursor.fetchone()
         if res is None or res['v_view'] != data['view']:
             sql = "INSERT INTO base_video_data(\
-                  bvid, v_view, v_favorite, v_danmaku, v_reply, v_coin, v_share, v_now_rank, v_like) \
-                  VALUES ('%s', %s, %s, %s, %s, %s,  %s,  %s,  %s)" % \
-                  (data['bvid'],data['view'],data['favorite'],data['danmaku'],data['reply'],data['coin'],data['share'],data['now_rank'],data['like'])
+                  vid, v_view, v_favorite, v_danmaku, v_reply, v_coin, v_share, v_like) \
+                  VALUES ('%s', %s, %s, %s, %s, %s, %s, %s)" % \
+                  (data['vid'],data['view'],data['favorite'],data['danmaku'],data['reply'],data['coin'],data['share'],data['like'])
+            sql2 = "UPDATE video SET v_coin = '%s',v_danmaku = '%s',v_favorite = '%s',v_like = '%s',v_reply = '%s',v_share = '%s',v_view = '%s' WHERE id = '%s'" % \
+                  (data['coin'],data['danmaku'],data['favorite'],data['like'],data['reply'],data['share'],data['view'],data['vid'])
+
             try:
                 cursor.execute(sql)
+                cursor.execute(sql2)
                 db.commit()
             except:
                 db.rollback()
+
         db.close()
 
     #获取捕获视频列表

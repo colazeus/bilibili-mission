@@ -7,10 +7,11 @@ videolist = db.get_video_list()
 
 for row in videolist:
     bvid = row['bvid']
+    vid = row['vid']
     v = video.get_video_info(bvid=bvid)
     stat = v["stat"]
     data = {
-        'bvid' : bvid,
+        'vid' : vid,
         'view' : stat['view'], #播放数
         'favorite' : stat['favorite'], #收藏数
         'danmaku' : stat['danmaku'], #弹幕数
