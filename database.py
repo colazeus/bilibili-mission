@@ -44,3 +44,40 @@ class Database:
             return results
         except:
             print ("Error: unable to fetch data")
+        db.close()
+
+    #获取捕获UP主列表
+    def get_up_list(self):
+        db = pymysql.connect(host=Database.ip,port=Database.port,user=Database.user,passwd=Database.pawd,db=Database.db_name,charset='utf8')
+        cursor = db.cursor(cursor=pymysql.cursors.DictCursor)
+        sql = "SELECT * FROM get_member_list WHERE expiration_time > '%s'" % (time.strftime('%Y-%m-%d %H:%M:%S'))
+        try:
+            cursor.execute(sql)
+            results = cursor.fetchall()
+            return results
+        except:
+            print ("Error: unable to fetch data")
+        db.close()
+
+    #保存UP数据
+    def save_up_data(self,data):
+        db = pymysql.connect(host=Database.ip,port=Database.port,user=Database.user,passwd=Database.pawd,db=Database.db_name,charset='utf8')
+        cursor = db.cursor(cursor=pymysql.cursors.DictCursor)
+        sql = "SELECT * FROM base_member_data WHERE mid = '%s' order by id desc limit 1" % (data['mid'])
+        cursor.execute(sql)
+        res = cursor.fetchone()
+        if res is None or res['m_follower'] != data['m_follower']:
+            sql = "INSERT INTO base_member_data(\
+              mid, m_following, m_follower) \
+              VALUES ('%s', %s, %s)" % \
+              (data['mid'],data['m_following'],data['m_follower'])
+            sql2 = "UPDATE member SET m_following = '%s',m_follower = '%s' WHERE id = '%s'" % \
+            (data['m_following'],data['m_follower'],data['mid'])
+        try:
+            cursor.execute(sql)
+            cursor.execute(sql2)
+            db.commit()
+        except:
+            db.rollback()
+
+        db.close()
